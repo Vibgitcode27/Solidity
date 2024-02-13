@@ -4,13 +4,21 @@ pragma solidity ^0.8.0;
 import "@chainlink/contracts/src/v0.8/interfaces/AggregatorV3Interface.sol";
 import "./PriceConverter.sol";
 
+error OwnerError();
+
 contract FundMe{
     using PriceConverter for uint256;
 
-    uint public minUSD = 50 * 1e18;
+    uint public constant minUSD = 50 * 1e18;
 
     address[] public funders;
     mapping(address => uint256) public addressToAmountFunded;
+
+    address public owner;
+
+    constructor() {
+        owner = msg.sender;
+    }
 
     function fund() public payable {
         // Want to be able to set a minimum fund amount in USD
@@ -42,7 +50,9 @@ contract FundMe{
         return ethAmountInUsd;
     }
 
-    function withdraw() public {
+    function withdraw() public onlyOwner{
+        // require(msg.sender == owner , "Sender is not owner");
+
         for (uint funderIndex ; funderIndex < funders.length; funderIndex ++) 
         {
             address funder = funders[funderIndex];
@@ -51,14 +61,36 @@ contract FundMe{
         // reset the array
         funders = new address[](0);
         // actually withdraw the funds
-
         // transfer
-        payable(msg.sender).transfer(address(this).balance);
+        // payable(msg.sender).transfer(address(this).balance);
         // send 
-        bool sendSuccess = payable(msg.sender).send(address(this).balance);
-        require(sendSuccess, "Send Failed");
+        // bool sendSuccess = payable(msg.sender).send(address(this).balance);
+        // require(sendSuccess, "Send Failed");
         // call
         (bool callSuccess, /*bytes memory dataReturned*/) = payable(msg.sender).call{value : address(this).balance}("");
         require(callSuccess , "Call Failed");
     }
+
+    modifier onlyOwner {
+        // require(msg.sender == owner , "Sender is not owner");
+        if(msg.sender != owner)
+        {
+            revert OwnerError();
+        }
+        _;
+    }
+
+    // What happens if someone sends ETH without calling any function
+
+    // Solidity has few special functions
+    // receive()
+    // fallabck()
+
+    receive() external payable {
+        fund();
+     }
+
+    fallback() external payable {
+        fund();
+     }
 }
