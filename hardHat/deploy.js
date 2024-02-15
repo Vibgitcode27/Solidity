@@ -5,11 +5,11 @@ require("dotenv").config();
 async function main()
 {
     const provider = new ethers.JsonRpcProvider(process.env.RPC_URL)
-    // const wallet = new ethers.Wallet(process.env.PRIVATE_KEY , provider);
-    const encryptedJson = fs.readFileSync("./encryptedKey.json" , "utf-8");
-    let wallet = ethers.Wallet.fromEncryptedJsonSync(encryptedJson, process.env.PRIVATE_KEY_PASSWORD);
+    const wallet = new ethers.Wallet(process.env.PRIVATE_KEY , provider);
+    // const encryptedJson = fs.readFileSync("./encryptedKey.json" , "utf-8");
+    // let wallet = ethers.Wallet.fromEncryptedJsonSync(encryptedJson, process.env.PRIVATE_KEY_PASSWORD);
 
-    wallet = await wallet.connect(provider);
+    // wallet = await wallet.connect(provider);
 
     const abi = fs.readFileSync("./SimpleStorage_sol_SimpleStorage.abi" , "utf-8");
     const binary = fs.readFileSync("./SimpleStorage_sol_SimpleStorage.bin" , "utf-8");
@@ -19,6 +19,7 @@ async function main()
     const contract = await contractFactory.deploy();
     // console.log("THis is contract\n" , contractFactory);
     const contractReceipt = await contract.deploymentTransaction().wait(1);
+    console.log(`Contract Address : - ${contract.address}`);
     // console.log("THis is contract Receipt\n" , contractReceipt);
     
     
@@ -38,7 +39,7 @@ async function main()
 
     const currentFavouriteNumber = await contract.retrieve();
     console.log(currentFavouriteNumber.toString());
-    const tranctionResponse = await contract.store("20"); // Best practice is to pass numbers as strings
+    const tranctionResponse = await contract.store("10"); // Best practice is to pass numbers as strings
     const trasactionReceipt = await tranctionResponse.wait(1);
     const updatedFavouriteNumber = await contract.retrieve();
     console.log("Updated Favourite number is : " , updatedFavouriteNumber);
