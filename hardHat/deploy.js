@@ -1,10 +1,15 @@
 const ethers = require('ethers');
 const fs = require('fs-extra');
+require("dotenv").config();
 
 async function main()
 {
-    const provider = new ethers.JsonRpcProvider("http://127.0.0.1:7545")
-    const wallet = new ethers.Wallet("0x9fdf2b0f33589ed28e5ac897277797931b8c565d0edf38f802d003dd79776c84" , provider);
+    const provider = new ethers.JsonRpcProvider(process.env.RPC_URL)
+    // const wallet = new ethers.Wallet(process.env.PRIVATE_KEY , provider);
+    const encryptedJson = fs.readFileSync("./encryptedKey.json" , "utf-8");
+    let wallet = ethers.Wallet.fromEncryptedJsonSync(encryptedJson, process.env.PRIVATE_KEY_PASSWORD);
+
+    wallet = await wallet.connect(provider);
 
     const abi = fs.readFileSync("./SimpleStorage_sol_SimpleStorage.abi" , "utf-8");
     const binary = fs.readFileSync("./SimpleStorage_sol_SimpleStorage.bin" , "utf-8");
@@ -33,7 +38,10 @@ async function main()
 
     const currentFavouriteNumber = await contract.retrieve();
     console.log(currentFavouriteNumber.toString());
-
+    const tranctionResponse = await contract.store("20"); // Best practice is to pass numbers as strings
+    const trasactionReceipt = await tranctionResponse.wait(1);
+    const updatedFavouriteNumber = await contract.retrieve();
+    console.log("Updated Favourite number is : " , updatedFavouriteNumber);
 }
 
 main();
