@@ -7,12 +7,12 @@ const main = async () => {
   // await SimpleStorage.deployed();
   const address = await SimpleStorage.getAddress();
   console.log(`Deployed contract to:  ${address}`);
-  // if(network.config.chainId === 11155111 && process.env.ETHERSCAN_API_KEY)
-  // {
-    //   await verify(SimpleStorage.getAddress(), [])
-    // };
+  if(process.env.ETHERSCAN_API_KEY)
+  {
+      await verify(address, [])
+  };
     
-  // await SimpleStorage.deploymentTransaction().wait(6);
+  await SimpleStorage.deploymentTransaction().wait(6);
   const currentValue = await SimpleStorage.retrieve();
   console.log("Current Value is " ,currentValue);
 
