@@ -20,11 +20,12 @@ contract SimpleStorage {
         favouriteNumber = _FavouriteNumber;
     }
 
-    function addPerson(string memory _name , uint256 _favouriteNumber) public {
+    function addPerson(string memory _name , uint256 _favouriteNumber) public returns(uint256){
         People memory newPeople = People({favouriteNumber : _favouriteNumber , name : _name});
         people.push(newPeople);
         // people.push(People(_favouriteNumber , _name));
         nameToFavouriteNumber[_name] = _favouriteNumber;
+        return nameToFavouriteNumber[_name];
     }
 
     function retrieve() public view returns (uint256){
