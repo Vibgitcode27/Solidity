@@ -7,11 +7,10 @@ library PriceConverter {
 
 // All functions should be internal in library
 
-    function getLivePrice() internal view returns(uint256){
+    function getLivePrice(AggregatorV3Interface priceFeed) internal view returns(uint256){
             // Two things we need
             // ABI
             // Address 0x694AA1769357215DE4FAC081bf1f309aDC325306 ETH/USD
-            AggregatorV3Interface priceFeed = AggregatorV3Interface(0x694AA1769357215DE4FAC081bf1f309aDC325306);
             (,int256 answer,,,) = priceFeed.latestRoundData(); // This will return price in USD
             return uint256(answer * 1e10);
     }
@@ -21,8 +20,8 @@ library PriceConverter {
         return priceFeed.decimals();
     }
 
-    function getConversionRate(uint ethAmount) internal view returns(uint){
-        uint ethprice = getLivePrice();
+    function getConversionRate(uint ethAmount , AggregatorV3Interface priceFeed) internal view returns(uint){
+        uint ethprice = getLivePrice(priceFeed);
         uint ethAmountInUsd = (ethAmount * ethprice) / 1e18; // (ethAmount * ethprice) will give a number with 32 decimal places so we divide it with 1e18
         return ethAmountInUsd;
     }

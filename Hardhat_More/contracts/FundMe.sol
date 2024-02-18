@@ -16,8 +16,11 @@ contract FundMe{
 
     address public owner;
 
-    constructor() {
+    AggregatorV3Interface public priceFeed;
+
+    constructor(address priceFeedAddress) {
         owner = msg.sender;
+        priceFeed = AggregatorV3Interface(priceFeedAddress);
     }
 
     function fund() public payable {
@@ -25,29 +28,9 @@ contract FundMe{
         // 1. How do we send ETH to this contract
         // require(getConversionRate(msg.value) >= minUSD   , "Didn't send enough"); // 
         // Instead we can do 
-        require(msg.value.getConversionRate() >= minUSD , "Didn't send enough"); // Using library function here
+        require(msg.value.getConversionRate(priceFeed) >= minUSD , "Didn't send enough"); // Using library function here
         funders.push(msg.sender); 
         addressToAmountFunded[msg.sender] = msg.value;
-    }
-
-    function getLivePrice() public view returns(uint256){
-            // Two things we need
-            // ABI
-            // Address 0x694AA1769357215DE4FAC081bf1f309aDC325306 ETH/USD
-            AggregatorV3Interface priceFeed = AggregatorV3Interface(0x694AA1769357215DE4FAC081bf1f309aDC325306);
-            (,int256 answer,,,) = priceFeed.latestRoundData(); // This will return price in USD
-            return uint256(answer * 1e10);
-    }
-
-    function getVersion() public view returns(uint){
-        AggregatorV3Interface priceFeed = AggregatorV3Interface(0x694AA1769357215DE4FAC081bf1f309aDC325306);
-        return priceFeed.decimals();
-    }
-
-    function getConversionRate(uint ethAmount) public view returns(uint){
-        uint ethprice = getLivePrice();
-        uint ethAmountInUsd = (ethAmount * ethprice) / 1e18; // (ethAmount * ethprice) will give a number with 32 decimal places so we divide it with 1e18
-        return ethAmountInUsd;
     }
 
     function withdraw() public onlyOwner{
