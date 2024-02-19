@@ -6,7 +6,7 @@ import "@nomicfoundation/hardhat-verify";
 import "hardhat-gas-reporter";
 import "solidity-coverage";
 import "@typechain/hardhat"; // generate Typechain typings for compiled contracts
-// import "@nomiclabs/hardhat-ethers"
+import "@nomiclabs/hardhat-ethers"
 import "hardhat-deploy"
 
 // @type import('hardhat/config').HardhatUserConfig
@@ -24,6 +24,8 @@ module.exports = {
     sepolia : {
       url : SEPOLIA_RPC_URL,
       accounts : [PRIVATE_KEY],
+      chainId : 11155111,
+      blockConfirmations : 2
     },
   },
   solidity: {

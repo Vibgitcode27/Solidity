@@ -1,6 +1,7 @@
 import { network } from "hardhat";
 import {networkConfig} from "../helper-hardhat-config"
 import { developmentChain , DECIMALS , INITIAL_ANSWER } from "../helper-hardhat-config"
+import { verify } from "../utils/verify";
 
 const chainId = network.config.chainId;
 console.log("chainId" , chainId);
@@ -16,7 +17,7 @@ export default async(hre : any) => {
     const {getNamedAccounts , deployments} = hre;
     const { deploy , log} = deployments;
     const {deployer} = await getNamedAccounts();
-    const chainId = network.config.chainId!
+    const chainId = network.config.chainId
 
 
     let ethUsdPRiceFeedAddress;
@@ -31,7 +32,18 @@ export default async(hre : any) => {
 
     // if(chainId is X use address Y)
 
-    const fundMe = await deploy("FundMe" , {from : deployer ,  args: [ethUsdPRiceFeedAddress] , log : true})
+    const fundMe = await deploy("FundMe" , 
+    {
+      from : deployer,
+      args: [ethUsdPRiceFeedAddress], 
+      log : true,
+      waitConfirmations:  2,
+    })
+
+    if( !developmentChain.includes(network.name) && process.env.ETHERSCAN_API_KEY)
+    {
+      await verify(fundMe.address , [ethUsdPRiceFeedAddress])
+    }
 }
 
 module.exports.tags = ["all" , "fundme"]
