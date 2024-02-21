@@ -59,6 +59,18 @@ contract FundMe{
         require(callSuccess , "Call Failed");
     }
 
+    function cheaperWithdraw() public payable {
+        address[] memory memFunders = funders;
+
+        for (uint i = 0; i < memFunders.length; i++) {
+            address funder = memFunders[i];
+            addressToAmountFunded[funder] = 0;
+        }
+        memFunders = new address[](0);
+        (bool callSuccess, ) = payable(msg.sender).call{value : address(this).balance}("");
+        require(callSuccess , "Call Failed");
+    }
+
     modifier onlyOwner {
         if(msg.sender != owner)
         {
